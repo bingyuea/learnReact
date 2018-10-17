@@ -1,0 +1,36 @@
+html {
+  height: 100%;
+}
+
+.commentApp {
+  width: 100vw;
+  height: 100vh;
+  padding: 15px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.commentInput {}
+
+.item {
+  width: 100%;
+  margin-bottom: 20px;
+  display: flex;
+  height: 30px;
+  line-height: 30px;
+}
+
+.item>label {
+  width: 80px;
+}
+
+.item>input,
+.item>textarea {
+  flex: 1;
+}
+
+.commentList {
+  flex: 1;
+  overflow: auto;
+}

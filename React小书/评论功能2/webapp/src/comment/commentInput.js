@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import LocalStorage from '../utils/utils.js'
 
 class CommentInput extends Component {
   constructor() {
@@ -31,10 +32,18 @@ class CommentInput extends Component {
     }
   }
 
+  handleSaveUser(event) {
+    LocalStorage.set('userName', event.target.value)
+  }
+
+  componentWillMount() {
+    this.setState({
+      userName: LocalStorage.get('userName') || ''
+    })
+  }
+
   componentDidMount() {
-    console.log(this)
-    console.log(this.input)
-    console.log(this.input.focus)
+    this.textarea.focus()
   }
 
   render() {
@@ -46,12 +55,14 @@ class CommentInput extends Component {
             ref={input => (this.input = input)}
             type="text"
             value={this.state.userName}
+            onBlur={this.handleSaveUser.bind(this)}
             onChange={this.handleUserChange.bind(this)}
           />
         </div>
         <div className="item">
           <label>评论内容:</label>
           <textarea
+            ref={textarea => (this.textarea = textarea)}
             value={this.state.content}
             onChange={this.handleContentChange.bind(this)}
           />

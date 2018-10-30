@@ -5,7 +5,59 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      appState: {
+      appState: {}
+    }
+  }
+
+  componentDidMount() {
+    // this.dispatch({ type: 'UPDATE_TITLE_TEXT', text: '《React.js 小书》' }) // 修改标题文本
+    // this.dispatch({ type: 'UPDATE_TITLE_COLOR', color: 'blue' }) // 修改标题颜色
+    let store = this.createStore(this.reducer)
+    let oldState = store.getState() // 缓存旧的state
+    store.subscribe(() => {
+      this.renderApp(store.getState(), oldState) // 写入新旧state
+      oldState = store.getState() // 对旧的state进行赋值
+    })
+    store.dispatch({
+      type: 'UPDATE_TITLE_TEXT',
+      text: '《React.js 小书  监测数据变化》'
+    }) // 修改标题文本
+    store.dispatch({ type: 'UPDATE_TITLE_TEXT', text: '《React.js 小书》' }) // 修改标题文本
+    store.dispatch({ type: 'UPDATE_TITLE_COLOR', color: 'blue' }) // 修改标题颜色
+  }
+
+  renderApp(appState, oldAppState = {}) {
+    if (appState === oldAppState) {
+      return
+    }
+    console.log('renderApp.......')
+    this.renderTitle(appState.title, oldAppState.title)
+    this.renderContent(appState.content, oldAppState.content)
+  }
+
+  renderTitle(title, oldTitle = {}) {
+    if (title === oldTitle) {
+      return
+    }
+    console.log('renderTitle.......')
+    const titleDOM = document.getElementById('title')
+    titleDOM.innerHTML = title.text
+    titleDOM.style.color = title.color
+  }
+
+  renderContent(content, oldContent = {}) {
+    if (content === oldContent) {
+      return
+    }
+    console.log('renderContent.......')
+    const contentDOM = document.getElementById('content')
+    contentDOM.innerHTML = content.text
+    contentDOM.style.color = content.color
+  }
+
+  reducer(state, action) {
+    if (!state) {
+      return {
         title: {
           text: 'React.js 小书',
           color: 'red'
@@ -16,62 +68,42 @@ class App extends Component {
         }
       }
     }
-  }
-
-  componentDidMount() {
-    let appState = this.state.appState || {}
-    // 这里任何代码都可以修改appState
-    // this.dispatch({ type: 'UPDATE_TITLE_TEXT', text: '《React.js 小书》' }) // 修改标题文本
-    // this.dispatch({ type: 'UPDATE_TITLE_COLOR', color: 'blue' }) // 修改标题颜色
-    let store = this.createStore(appState, this.stateChange)
-    store.subscribe(() => {
-      this.renderApp(store.getState())
-    })
-    store.dispatch({
-      type: 'UPDATE_TITLE_TEXT',
-      text: '《React.js 小书  监测数据变化》'
-    }) // 修改标题文本
-    store.dispatch({ type: 'UPDATE_TITLE_COLOR', color: 'blue' }) // 修改标题颜色
-  }
-
-  renderApp(appState) {
-    this.renderTitle(appState.title)
-    this.renderContent(appState.content)
-  }
-
-  renderTitle(title) {
-    const titleDOM = document.getElementById('title')
-    titleDOM.innerHTML = title.text
-    titleDOM.style.color = title.color
-  }
-
-  renderContent(content) {
-    const contentDOM = document.getElementById('content')
-    contentDOM.innerHTML = content.text
-    contentDOM.style.color = content.color
-  }
-
-  stateChange(state, action) {
     switch (action.type) {
       case 'UPDATE_TITLE_TEXT':
-        state.title.text = action.text
-        break
+        return {
+          ...state,
+          title: {
+            ...state.title,
+            text: action.text
+          }
+        }
+      // state.title.text = action.text
+      // break
       case 'UPDATE_TITLE_COLOR':
-        state.title.color = action.color
-        break
+        return {
+          ...state,
+          title: {
+            ...state.title,
+            color: action.color
+          }
+        }
+      // state.title.color = action.color
+      // break
       default:
         break
     }
   }
 
-  createStore(state, stateChange) {
+  createStore(reducer) {
+    let state = null
     let listeners = []
     const getState = () => state
     const subscribe = listener => listeners.push(listener)
     const dispatch = action => {
-      stateChange(state, action)
+      state = reducer(state, action) // 这里覆盖原来的对象,这个reducer其实就是一个纯函数
       listeners.map(listener => listener())
     }
+    dispatch({})
     return { getState, dispatch, subscribe }
   }
 
